@@ -14,6 +14,8 @@ const appointmentRoutes = require('./routes/appointments');
 const patientRoutes = require('./routes/patients');
 const chatRoutes = require('./routes/chat');
 const whatsappRoutes = require('./routes/whatsapp');
+const demoRoutes = require('./routes/demo');
+
 
 const app = express();
 const PORT = process.env.PORT || 3005;
@@ -32,6 +34,7 @@ app.use('/appointments', appointmentRoutes);
 app.use('/patients', patientRoutes);
 app.use('/chat', chatRoutes);
 app.use('/whatsapp', whatsappRoutes);
+app.use('/demo', demoRoutes);
 
 // Health check
 app.get('/health', async (req, res) => {

@@ -3,15 +3,33 @@ const router = express.Router();
 const { chat } = require('../services/ai');
 const { v4: uuidv4 } = require('uuid');
 
-// POST /chat — main AI conversation endpoint
-router.post('/', async (req, res) => {
+// Middleware — check demo token before allowing chat
+function checkDemoToken(req, res, next) {
+  const token = req.headers['x-demo-token'];
+
+  if (!token) {
+    return res.status(401).json({ error: 'Demo access required. Please enter the demo password.' });
+  }
+
+  try {
+    const decoded = Buffer.from(token, 'base64').toString('utf8');
+    if (decoded.startsWith('demo:')) {
+      return next();
+    }
+    res.status(401).json({ error: 'Invalid demo token' });
+  } catch {
+    res.status(401).json({ error: 'Invalid demo token' });
+  }
+}
+
+// POST /chat
+router.post('/', checkDemoToken, async (req, res) => {
   const { message, session_id, channel } = req.body;
 
   if (!message) {
     return res.status(400).json({ error: 'Message is required' });
   }
 
-  // Use existing session or create new one
   const sessionId = session_id || uuidv4();
 
   try {
@@ -23,7 +41,7 @@ router.post('/', async (req, res) => {
   }
 });
 
-// GET /chat/:session_id — get conversation history
+// GET /chat/:session_id
 router.get('/:session_id', async (req, res) => {
   const pool = require('../models/db');
   try {
